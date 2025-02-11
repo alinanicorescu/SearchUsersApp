@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct UsersListView: View {
-    
     let users: [User]
     var isLoading: Bool = false
     var onScrolledAtLastElement: () -> Void = {}
@@ -24,6 +23,7 @@ struct UsersListView: View {
                 }
             }
         }
+        .listStyle(.plain)
         
         if isLoading {
             ProgressView()

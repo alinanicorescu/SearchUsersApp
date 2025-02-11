@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct ContentView: View {
+    init() {
+        UINavigationBar.appearance().backgroundColor = UIColor.yellow
+    }
     var body: some View {
         UsersListContainer(viewModel: UsersViewModel())
     }

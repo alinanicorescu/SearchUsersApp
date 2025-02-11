@@ -14,10 +14,18 @@ struct UsersListContainer: View {
         NavigationStack {
             UsersListView(
                 users: viewModel.users,
-                isLoading: viewModel.canLoadNextPage,
+                isLoading: viewModel.isLoading,
                 onScrolledAtLastElement: viewModel.tryFetchNextPage
             )
-            .onAppear(perform: viewModel.tryFetchNextPage)
+            .toolbarBackground(Color.yellow, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("Users")
+        }
+        .searchable(text: $viewModel.seed, placement: .toolbar, prompt: "Search users...")
+        .onAppear {
+            UISearchBar.appearance().tintColor = .black
+            viewModel.tryFetchNextPage()
         }
     }
 }

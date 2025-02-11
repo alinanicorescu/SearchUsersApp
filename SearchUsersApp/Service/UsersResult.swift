@@ -8,10 +8,10 @@
 import Foundation
 
 struct UsersFetchInfo: Decodable {
-    let seed: String
-    let results: Int
-    let page: Int
-    let version: String
+    var seed: String
+    var results: Int
+    var page: Int
+    var version: String
 }
 
 struct UsersResult: Decodable {
