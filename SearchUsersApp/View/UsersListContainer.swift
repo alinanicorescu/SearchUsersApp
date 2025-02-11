@@ -24,12 +24,11 @@ struct UsersListContainer: View {
         }
         .searchable(text: $viewModel.seed, placement: .toolbar, prompt: "Search users...")
         .onAppear {
-            UISearchBar.appearance().tintColor = .black
             viewModel.tryFetchNextPage()
         }
     }
 }
 
 #Preview {
-    UsersListContainer(viewModel: UsersViewModel())
+    //UsersListContainer(viewModel: UsersViewModel())
 }

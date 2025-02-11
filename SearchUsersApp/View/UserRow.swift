@@ -39,9 +39,9 @@ struct UserRow: View {
 #Preview {
     let user  = User(id: UUID(),
                      name:
-                        UserName(title: "King", first: "John", last: "Snow"),
+                        UserName(title: "King", first: "FirstName", last: "LastName"),
                      picture:
                         UserPicture(large: "https://randomuser.me/api/portraits/men/77.jpg", medium: "https://randomuser.me/api/portraits/men/77.jpg", thumbnail: "https://randomuser.me/api/portraits/men/77.jpg"),
-                     email: "user.email@gmail.com")
+                     email: "firstName.lastName@gmail.com")
     UserRow(user: user)
 }

@@ -8,16 +8,27 @@
 import Foundation
 import Combine
 
+protocol UsersViewModelDelegateProtocol {
+    
+    func onReceivedResults(results: UsersResult)
+    
+    func onReceivedResultsError(error: Error)
+    
+    func onFetchedResults()
+    
+    func onReceivedSeed(seed: String)
+}
+
 protocol UsersViewModelProtocol: ObservableObject {
     
-    var usersService: UsersServiceProtocol { get }
+    var usersService: UsersServiceProtocol? { get }
     
     func tryFetchNextPage()
 }
 
-class UsersViewModel: UsersViewModelProtocol {
+final class UsersViewModel: UsersViewModelProtocol {
     
-    var usersService: any UsersServiceProtocol = UsersService()
+    var usersService: UsersServiceProtocol?
     
     private var subscriptions = Set<AnyCancellable>()
     
@@ -34,14 +45,17 @@ class UsersViewModel: UsersViewModelProtocol {
     private var maxPages: Int = 3
     
     private var resultsPerPage: Int = 20
-
+    
     @Published
     var seed: String
+    
+    private var delegate: UsersViewModelDelegateProtocol?
     
     init(_ initialSeed: String = "",
          maxPages: Int? = nil,
          resultsPerPage: Int? = nil,
-         usersService: UsersServiceProtocol? = nil) {
+         usersService: UsersServiceProtocol? = nil,
+         delegate: UsersViewModelDelegateProtocol? = nil) {
         
         self.seed = initialSeed
         
@@ -55,6 +69,12 @@ class UsersViewModel: UsersViewModelProtocol {
         
         if let usersService = usersService {
             self.usersService = usersService
+        } else {
+            self.usersService =  UsersService()
+        }
+        
+        if let delegate = delegate {
+            self.delegate = delegate
         }
         
         self.$seed.debounce(for: .milliseconds(1000), scheduler: DispatchQueue.main)
@@ -64,14 +84,20 @@ class UsersViewModel: UsersViewModelProtocol {
             .store(in: &subscriptions)
     }
     
+    //Another option is to use swift concurrency with async await
     func tryFetchNextPage() {
-        guard canLoadNextPage else { return }
+        guard let usersService = usersService, canLoadNextPage else { return }
         isLoading = true
-        let fetchInfo = fetchInfo ?? UsersFetchInfo(seed: seed, results: self.resultsPerPage, page: 0, version: "")
-        usersService.searchUsers(seed: seed , page: fetchInfo.page + 1, resultsPerPage: resultsPerPage)?
+        canLoadNextPage = false
+        self.delegate?.onFetchedResults()
+        usersService.searchUsers(seed: seed , page: nextPage(), resultsPerPage: resultsPerPage)
             .sink(receiveCompletion: onReceive,
                   receiveValue: onReceive)
             .store(in: &subscriptions)
+    }
+    
+    private func nextPage() -> Int {
+        (fetchInfo?.page ?? 0) + 1
     }
     
     private func onReceive(_ completion: Subscribers.Completion<Error>) {
@@ -80,22 +106,20 @@ class UsersViewModel: UsersViewModelProtocol {
         case .finished:
             break
         case .failure(let error):
-            print(error)
             canLoadNextPage = false
+            self.delegate?.onReceivedResultsError(error: error)
         }
     }
     
     private func onReceive(_ userSearchResult: UsersResult) {
         isLoading = false
         users += userSearchResult.results
-        fetchInfo = userSearchResult.info
-        print(users.last)
-        guard let fetchInfo = self.fetchInfo else {
-            canLoadNextPage = false
-            return
-        }
+        self.fetchInfo = userSearchResult.info
+        guard let fetchInfo =  self.fetchInfo else { return }
+        
         canLoadNextPage = (fetchInfo.page < maxPages) && (
             fetchInfo.results == resultsPerPage)
+        self.delegate?.onReceivedResults(results: userSearchResult)
     }
     
     private func onReceive(_ value: String) {
@@ -103,5 +127,6 @@ class UsersViewModel: UsersViewModelProtocol {
         canLoadNextPage = true
         fetchInfo = nil
         tryFetchNextPage()
+        self.delegate?.onReceivedSeed(seed: value)
     }
 }

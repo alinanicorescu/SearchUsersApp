@@ -34,21 +34,21 @@ struct UsersListView: View {
 #Preview {
     let user1  = User(id: UUID(),
                       name:
-                        UserName(title: "King", first: "John1", last: "Snow"),
+                        UserName(title: "Mr", first: "FirstName1", last: "LastName1"),
                       picture:
                         UserPicture(large: "https://randomuser.me/api/portraits/men/77.jpg", medium: "https://randomuser.me/api/portraits/men/77.jpg", thumbnail: "https://randomuser.me/api/portraits/men/77.jpg"),
-                      email: "user.email@gmail.com")
+                      email: "firstName1.lastName1@gmail.com")
     let user2  = User(id: UUID(),
                       name:
-                        UserName(title: "King", first: "John2", last: "Snow"),
+                        UserName(title: "Mr", first: "FirstName2", last: "LastName2"),
                       picture:
                         UserPicture(large: "https://randomuser.me/api/portraits/men/77.jpg", medium: "https://randomuser.me/api/portraits/men/77.jpg", thumbnail: "https://randomuser.me/api/portraits/men/77.jpg"),
-                      email: "user.email@gmail.com")
+                      email: "firstName2.lastName2@gmail.com")
     let user3 = User(id: UUID(),
                      name:
-                        UserName(title: "King", first: "John3", last: "Snow"),
+                        UserName(title: "Mr", first: "FirstName3", last: "LastName3"),
                      picture:
                         UserPicture(large: "https://randomuser.me/api/portraits/men/77.jpg", medium: "https://randomuser.me/api/portraits/men/77.jpg", thumbnail: "https://randomuser.me/api/portraits/men/77.jpg"),
-                     email: "user.email@gmail.com")
+                     email: "firstName3.lastname3@gmail.com")
     UsersListView(users: [user1, user2, user3])
 }

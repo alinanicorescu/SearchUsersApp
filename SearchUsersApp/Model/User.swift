@@ -53,6 +53,7 @@ struct User: Decodable, Identifiable, Equatable {
         id = try loginContainer.decode(UUID.self, forKey: .uuid)
     }
     
+    //i didn't find the property for the time
     var time: String {
         return "11:04"
     }
