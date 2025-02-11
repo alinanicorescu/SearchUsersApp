@@ -11,7 +11,14 @@ struct UsersListContainer: View {
     @ObservedObject var viewModel: UsersViewModel
     
     var body: some View {
-        Text("Users List Container")
+        NavigationStack {
+            UsersListView(
+                users: viewModel.users,
+                isLoading: viewModel.canLoadNextPage,
+                onScrolledAtLastElement: viewModel.tryFetchNextPage
+            )
+            .onAppear(perform: viewModel.tryFetchNextPage)
+        }
     }
 }
 
