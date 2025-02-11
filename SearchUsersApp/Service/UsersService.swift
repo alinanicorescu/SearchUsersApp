@@ -20,9 +20,24 @@ protocol UsersServiceProtocol: ServiceBaseProtocol {
 }
 
 class UsersService: UsersServiceProtocol {
-    var urlString: String = ""
     
-    func searchUsers(seed: String, page: Int, resultsPerPage: Int) -> AnyPublisher<UsersResult, any Error>? {
-        return .none
+    var urlString: String = "https://randomuser.me/api/"
+    
+    init(urlString: String? = nil) {
+        if let urlString = urlString {
+            self.urlString = urlString
+        }
+    }
+    
+    func searchUsers(seed: String, page: Int, resultsPerPage: Int) -> AnyPublisher<UsersResult, Error>? {
+        guard let url = URL(string: urlString + "?page=\(page)&results=\(resultsPerPage)&seed=\(seed)") else {
+            return nil
+        }
+        print(url)
+        return URLSession.shared
+            .dataTaskPublisher(for: url)
+            .tryMap { try JSONDecoder().decode(UsersResult.self, from: $0.data)}
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
     }
 }
