@@ -87,10 +87,9 @@ final class UsersViewModel: UsersViewModelProtocol {
     //Another option is to use swift concurrency with async await
     func tryFetchNextPage() {
         guard let usersService = usersService, canLoadNextPage else { return }
-        isLoading = true
-        canLoadNextPage = false
-        self.delegate?.onFetchedResults()
-        usersService.searchUsers(seed: seed , page: nextPage(), resultsPerPage: resultsPerPage)
+        willFetchNextPage()
+        let usersRequest = UsersRequest(seed: seed, page: nextPage(), resultsPerPage: resultsPerPage)
+        usersService.searchUsers(usersRequest)
             .sink(receiveCompletion: onReceive,
                   receiveValue: onReceive)
             .store(in: &subscriptions)
@@ -98,6 +97,12 @@ final class UsersViewModel: UsersViewModelProtocol {
     
     private func nextPage() -> Int {
         (fetchInfo?.page ?? 0) + 1
+    }
+    
+    private func willFetchNextPage() {
+        isLoading = true
+        canLoadNextPage = false
+        self.delegate?.onFetchedResults()
     }
     
     private func onReceive(_ completion: Subscribers.Completion<Error>) {

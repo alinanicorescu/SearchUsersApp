@@ -27,9 +27,8 @@ final class SearchUsersServiceTests: XCTestCase {
     
     func testUsersFetchCall() throws {
         XCTAssertNotNil(usersService)
-        let data = usersService?.searchUsers(seed: seed,
-                                             page: page,
-                                             resultsPerPage: resultsPerPage)
+        let usersRequest = UsersRequest(seed: seed, page: page, resultsPerPage: resultsPerPage)
+        let data = usersService?.searchUsers(usersRequest)
         XCTAssertNotNil(data)
         
         guard let data = data else {

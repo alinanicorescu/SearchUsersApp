@@ -27,7 +27,7 @@ final class UsersServiceMock: UsersServiceProtocol {
         self.expectedError = expectedError
     }
     
-    func searchUsers(seed: String, page: Int, resultsPerPage: Int) -> AnyPublisher<UsersResult, any Error> {
+    func searchUsers(_ usersRequest: UsersRequest) -> AnyPublisher<UsersResult, any Error> {
         if let expectedResults = expectedResults {
             return Just(expectedResults).setFailureType(to: Error.self).eraseToAnyPublisher()
         } else {

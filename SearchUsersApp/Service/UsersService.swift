@@ -15,7 +15,7 @@ protocol ServiceBaseProtocol: AnyObject {
 
 protocol UsersServiceProtocol: ServiceBaseProtocol {
     
-    func searchUsers( seed: String, page: Int, resultsPerPage: Int) -> AnyPublisher<UsersResult, Error>
+    func searchUsers(_ request: UsersRequest) -> AnyPublisher<UsersResult, Error>
 }
 
 class UsersService: UsersServiceProtocol {
@@ -32,18 +32,8 @@ class UsersService: UsersServiceProtocol {
         }
     }
     
-    func searchUsers(seed: String, page: Int, resultsPerPage: Int) -> AnyPublisher<UsersResult, any Error>  {
-        var components = URLComponents(string: urlString)
-        guard var components = components else {
-            return Empty().setFailureType(to: Error.self).eraseToAnyPublisher()
-        }
-        components.queryItems =  [
-            URLQueryItem(name: UrlParams.seed.rawValue, value: seed),
-            URLQueryItem(name: UrlParams.page.rawValue, value: String(page)),
-            URLQueryItem(name: UrlParams.results.rawValue, value: String(resultsPerPage))
-        ]
-        
-        guard let url = components.url else {
+    func searchUsers(_ request: UsersRequest) -> AnyPublisher<UsersResult, any Error>  {
+        guard let url = createUrl(request) else {
             return Empty().setFailureType(to: Error.self).eraseToAnyPublisher()
         }
         
@@ -57,5 +47,18 @@ class UsersService: UsersServiceProtocol {
             }.decode(type: UsersResult.self, decoder: JSONDecoder())
             .receive(on: DispatchQueue.main)
             .eraseToAnyPublisher()
+    }
+    
+    private func createUrl(_ request: UsersRequest) -> URL? {
+        let components = URLComponents(string: urlString)
+        guard var components = components else {
+            return nil
+        }
+        components.queryItems =  [
+            URLQueryItem(name: UrlParams.seed.rawValue, value: request.seed),
+            URLQueryItem(name: UrlParams.page.rawValue, value: String(request.page)),
+            URLQueryItem(name: UrlParams.results.rawValue, value: String(request.resultsPerPage))
+        ]
+        return components.url
     }
 }
