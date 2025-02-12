@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 
+//I used this protocol to create mocks for testing, a mocking framework can also be used
 protocol UsersViewModelDelegateProtocol {
     
     func onReceivedResults(results: UsersResult)

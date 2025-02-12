@@ -10,6 +10,73 @@ import Combine
 @testable import SearchUsersApp
 
 
+final class SearchUsersViewModelTests: XCTestCase {
+    
+    let seed = "Abc"
+    let resultsPerPage = 20
+    let page = 1
+    
+    var expectedResults: UsersResult?
+    let expectedError = TestError()
+    let fetchExpectation = XCTestExpectation(description: "This is fetchExpectation.")
+    let receivedExpectation = XCTestExpectation(description: "This is receivedExpectation.")
+    let errorExpectation = XCTestExpectation(description: "This is errorExpectation.")
+    
+    override func setUpWithError() throws {
+        try super.setUpWithError()
+        let fetchInfo = UsersFetchInfo(seed: seed, results: resultsPerPage, page: 1, version: "")
+        expectedResults = UsersResult(results: [], info: fetchInfo)
+    }
+    
+    override func tearDownWithError() throws {
+        try super.tearDownWithError()
+    }
+    
+    func testFetchResults() throws {
+        let  usersService = UsersServiceMock(expectedResults: expectedResults)
+        let viewModelDelegateMock = UsersViewModelDelegateMock(expectedResults: expectedResults, fetchedExpectation: fetchExpectation, receivedExpectation: receivedExpectation)
+        
+        let viewModel = UsersViewModel(
+            seed,
+            resultsPerPage: resultsPerPage,
+            usersService: usersService,
+            delegate: viewModelDelegateMock
+        )
+        
+        viewModel.tryFetchNextPage()
+        wait(for: [fetchExpectation, receivedExpectation], timeout: 10.0)
+        XCTAssertEqual(viewModelDelegateMock.fetchCallCount, 1)
+        XCTAssertEqual(viewModelDelegateMock.receiveResultsCallCount, 1)
+        XCTAssertEqual(viewModelDelegateMock.receiveErrorCallCount, 0)
+    }
+    
+    func testFetchError() throws {
+        let  usersService = UsersServiceMock(expectedError: TestError())
+        let viewModelDelegateMock = UsersViewModelDelegateMock(fetchedExpectation: fetchExpectation, errorExpectaion: errorExpectation)
+        
+        let viewModel = UsersViewModel(
+            seed,
+            resultsPerPage: resultsPerPage,
+            usersService: usersService,
+            delegate: viewModelDelegateMock
+        )
+        
+        viewModel.tryFetchNextPage()
+        wait(for: [fetchExpectation, errorExpectation], timeout: 10.0)
+        XCTAssertEqual(viewModelDelegateMock.fetchCallCount, 1)
+        XCTAssertEqual(viewModelDelegateMock.receiveResultsCallCount, 0)
+        XCTAssertEqual(viewModelDelegateMock.receiveErrorCallCount, 1)
+    }
+    
+    
+    func testPerformanceExample() throws {
+        // This is an example of a performance test case.
+        self.measure {
+            // Put the code you want to measure the time of here.
+        }
+    }
+}
+
 struct TestError: Error {
 }
 
@@ -88,72 +155,5 @@ final class UsersViewModelDelegateMock: UsersViewModelDelegateProtocol {
     
     func onReceivedSeed(seed: String) {
         
-    }
-}
-
-final class SearchUsersViewModelTests: XCTestCase {
-    
-    let seed = "Abc"
-    let resultsPerPage = 20
-    let page = 1
-    
-    var expectedResults: UsersResult?
-    let expectedError = TestError()
-    let fetchExpectation = XCTestExpectation(description: "This is fetchExpectation.")
-    let receivedExpectation = XCTestExpectation(description: "This is receivedExpectation.")
-    let errorExpectation = XCTestExpectation(description: "This is errorExpectation.")
-    
-    override func setUpWithError() throws {
-        try super.setUpWithError()
-        let fetchInfo = UsersFetchInfo(seed: seed, results: resultsPerPage, page: 1, version: "")
-        expectedResults = UsersResult(results: [], info: fetchInfo)
-    }
-    
-    override func tearDownWithError() throws {
-        try super.tearDownWithError()
-    }
-    
-    func testFetchResults() throws {
-        let  usersService = UsersServiceMock(expectedResults: expectedResults)
-        let viewModelDelegateMock = UsersViewModelDelegateMock(expectedResults: expectedResults, fetchedExpectation: fetchExpectation, receivedExpectation: receivedExpectation)
-        
-        let viewModel = UsersViewModel(
-            seed,
-            resultsPerPage: resultsPerPage,
-            usersService: usersService,
-            delegate: viewModelDelegateMock
-        )
-        
-        viewModel.tryFetchNextPage()
-        wait(for: [fetchExpectation, receivedExpectation], timeout: 10.0)
-        XCTAssertEqual(viewModelDelegateMock.fetchCallCount, 1)
-        XCTAssertEqual(viewModelDelegateMock.receiveResultsCallCount, 1)
-        XCTAssertEqual(viewModelDelegateMock.receiveErrorCallCount, 0)
-    }
-    
-    func testFetchError() throws {
-        let  usersService = UsersServiceMock(expectedError: TestError())
-        let viewModelDelegateMock = UsersViewModelDelegateMock(fetchedExpectation: fetchExpectation, errorExpectaion: errorExpectation)
-        
-        let viewModel = UsersViewModel(
-            seed,
-            resultsPerPage: resultsPerPage,
-            usersService: usersService,
-            delegate: viewModelDelegateMock
-        )
-        
-        viewModel.tryFetchNextPage()
-        wait(for: [fetchExpectation, errorExpectation], timeout: 10.0)
-        XCTAssertEqual(viewModelDelegateMock.fetchCallCount, 1)
-        XCTAssertEqual(viewModelDelegateMock.receiveResultsCallCount, 0)
-        XCTAssertEqual(viewModelDelegateMock.receiveErrorCallCount, 1)
-    }
-    
-    
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
     }
 }
